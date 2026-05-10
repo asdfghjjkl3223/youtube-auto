@@ -3,8 +3,14 @@ import gdown
 from flask import Flask
 
 # -- CONFIG --
-# Screenshot mein jo '/folders/' ke baad wali ID thi, wo yahan dalo
-DRIVE_FOLDER_ID = "1-kkazE2zB4grKqtSNFdgaTLTSAVtUxDK" 
+# Yahan apni video files ki alag-alag IDs dalo (comma lagakar)
+VIDEO_FILE_IDS = [
+    "1TSIlnI-siUSamfqeWLmWgXr6eDxuzZhR",
+    "1WVX8TY1ug0rBtvz0aBpndvO710_zIb_8",
+    "18MU7ToVUY-59AnUwzUd3dMKKDm7Tc2YX"
+]
+# Agar abhi ek hi video hai, toh dusri line hata dena, sirf ek ID rakhna.
+
 STREAM_KEY = os.environ.get("STREAM_KEY", "YOUR_STREAM_KEY")
 CYCLE_ON_MINUTES = 150 
 CYCLE_OFF_MINUTES = 30 
@@ -13,34 +19,19 @@ app = Flask(__name__)
 
 @app.route('/')
 def keep_alive():
-    return "Bhajan Folder Stream is Active!"
-
-def get_video_list():
-    print("Scanning Google Drive folder...")
-    # Ise folder scan karne ke liye use karenge
-    url = f'https://drive.google.com/drive/folders/{DRIVE_FOLDER_ID}'
-    # gdown folder scan karke saari file IDs nikal sakta hai
-    files = gdown.list_objects(url, fuzzy=True)
-    # Sirf mp4 files filter karo
-    video_files = [f for f in files if f.name.endswith('.mp4')]
-    return video_files
+    return "Ekam Devotion Stream is Active!"
 
 def stream_logic():
     while True:
         try:
-            videos = get_video_list()
-            if not videos:
-                print("Folder mein koi video nahi mili! 5 min wait kar raha hu...")
-                time.sleep(300)
-                continue
-            
-            # Randomly ek video choose karo
-            selected_video = random.choice(videos)
-            print(f"Selected Video: {selected_video.name}")
+            # Randomly ek video ID choose karo
+            selected_id = random.choice(VIDEO_FILE_IDS)
+            print(f"Selected Video ID: {selected_id}")
             
             # Video download karo
             output = 'current_video.mp4'
-            gdown.download(id=selected_video.id, output=output, quiet=False)
+            url = f'https://drive.google.com/uc?id={selected_id}'
+            gdown.download(url, output, quiet=False)
             
             print("Starting Stream Cycle...")
             ffmpeg_cmd = (
