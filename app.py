@@ -33,13 +33,15 @@ def stream_logic():
             url = f'https://drive.google.com/uc?id={selected_id}'
             gdown.download(url, output, quiet=False)
             
-            print("Starting Stream Cycle...")
+            print("Starting Stream Cycle (Lightweight Mode)...")
+            # Ultra-lightweight FFmpeg command (0% Server Load)
             ffmpeg_cmd = (
                 f"ffmpeg -re -stream_loop -1 -i {output} "
-                f"-c:v libx264 -preset veryfast -b:v 1500k -maxrate 1500k -bufsize 3000k "
-                f"-framerate 10 -g 20 -c:a aac -b:a 128k -ar 44100 -f flv "
-                f"rtmp://a.rtmp.youtube.com/live2/{STREAM_KEY}"
+                f"-c copy -f flv rtmp://a.rtmp.youtube.com/live2/{STREAM_KEY}"
             )
+            
+            process = subprocess.Popen(ffmpeg_cmd, shell=True)
+            time.sleep(CYCLE_ON_MINUTES * 60)
             
             process = subprocess.Popen(ffmpeg_cmd, shell=True)
             time.sleep(CYCLE_ON_MINUTES * 60)
